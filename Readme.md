@@ -303,13 +303,3 @@ aws ecr delete-repository \
 ## Conclusion
 In this demo, we create a multiarch docker images and use it with EKS. 
 By combining Graviton 2 and spot, the potentiol saving is very important. For this demo I used 2 separeted managed node group for ARM and x86 to be sure to deploy my pod into the 2 architectures but the different architecture could be into the same managed node group.
-
-
-To remove:
-```
-aws eks --region $REGION update-kubeconfig --name eks-arch-managed-node-groups
-
-kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-
-kubectl top nodes
-```
