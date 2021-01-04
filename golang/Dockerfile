@@ -1,0 +1,9 @@
+FROM golang:1.15.6-alpine AS build
+WORKDIR /src
+COPY . .
+#RUN go build -o /out/main .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /out/main .
+FROM scratch AS bin
+COPY --from=build /out/main /main
+EXPOSE 8090
+ENTRYPOINT ["./main"]	

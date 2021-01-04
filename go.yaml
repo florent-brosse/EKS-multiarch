@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-deployment
+spec:
+  selector:
+    matchLabels:
+      app: golang
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: golang
+    spec:
+      containers:
+      - name: golang
+        image: $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/hello-world:go2
+        ports:
+        - containerPort: 8090 

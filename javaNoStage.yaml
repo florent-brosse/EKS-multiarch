@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: javaNoStage-deployment
+spec:
+  selector:
+    matchLabels:
+      app: javaNoStage
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: javaNoStage
+    spec:
+      containers:
+      - name: javaNoStage
+        image: $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/hello-world:javaNoStage
+        ports:
+        - containerPort: 8080 

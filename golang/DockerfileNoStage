@@ -1,0 +1,5 @@
+FROM scratch AS bin
+ARG TARGETARCH
+COPY $TARGETARCH /main
+EXPOSE 8090
+ENTRYPOINT ["./main"]	
