@@ -4,7 +4,7 @@
 
 Just a quick reminder about AWS Graviton.
 
-AWS Graviton Processor are custom built by Amazon Web Services using 64-bit Arm Neoverse cores to deliver the best price performance for your cloud workloads running in Amazon EC2. AWS Graviton2-based deliver up to 40% better price performance over comparable current generation x86-based instances1 for a broad spectrum of workloads such as application servers, microservices, video encoding, high-performance computing, electronic design automation, compression, gaming, open-source databases, in-memory caches, and CPU-based machine learning inference.
+AWS Graviton Processors are custom built by Amazon Web Services using 64-bit Arm Neoverse cores to deliver the best price performance for your cloud workloads running in Amazon EC2. AWS Graviton2-based deliver up to 40% better price-performance over comparable current generation x86-based instances1 for a broad spectrum of workloads such as application servers, microservices, video encoding, high-performance computing, electronic design automation, compression, gaming, open-source databases, in-memory caches, and CPU-based machine learning inference.
 
 ## Amazon EC2 Spot
 
@@ -13,12 +13,12 @@ Amazon EC2 Spot Instances let you take advantage of unused EC2 capacity in the A
 ## Goals
 The goal of this article is to show how to set up a multiarch EKS cluster and use spot managed group.
 Indeed diversification across multiple instance types are important with spot so why not adding Graviton2 based instances?
-The application is a hello-world web application developped in Java, in go and in nodeJS.
+The application is a hello-world web application developed in Java, in go and nodeJS.
 
 So the following step will be done:
 * Install all the needed tool in an instance
-* Create a EKS cluster
-* Create a ECR repository
+* Create an EKS cluster
+* Create an ECR repository
 * Add a spot ARM managed node group
 * Create multiarch docker images
    * for a Java application
@@ -120,7 +120,7 @@ You should see at least in Platforms: linux/amd64 and linux/arm64.
 
 ## Create the EKS cluster
 
-Create a EKS cluster with a on-demand x86 managed node group.
+Create an EKS cluster with an on-demand x86 managed node group.
 ```
 eksctl create cluster --name=eks-arch-managed-node-groups --instance-types=m5.xlarge,m5a.xlarge,m5d.xlarge --managed --nodes-max=5 --nodes-min=1 --nodes=1 --asg-access --nodegroup-name on-demand-amd-4vcpu-16gb --region=$REGION
 ```
@@ -165,22 +165,21 @@ Manifests:
   Platform:  linux/s390x
   ```
 
-We can see that the image is builded for the different architecture.
+We can see that the image is built for different architectures.
 For more information:
 https://docs.docker.com/registry/spec/manifest-v2-2/
 
 Docker manages to choose the right version they should pull and run according to the architecture of the docker engine.
 So you can use the same command `docker run -t -i --rm ubuntu bash` in amd64 or arm64.
 
-Let's do a hello world web app and push a multi architecture docker images into ECR.
+Let's do a hello world web app and push multi architecture docker images into ECR.
 
-I've tooked Java for the compiled into bytecode language, for the interpreted language I've choosed nodejs and for the compiled language go.
-So with theses examples we have all types of language. For example Python should use the same way than nodeJS because it's also a interpredted language.
+I've taken Java for the compiled into bytecode language, for the interpreted language I've chosen nodejs and for the compiled language go.
+So with these examples, we have all types of language. For example Python, should use the same way than nodeJS because it's also an interpreted language.
 
 ## JAVA
 
-For Java, the code is compiled to Java bytecode and it's architecteure independant. So when you build in arm or in amd64 the Java Bytecode will be the same.
-In this example I will build the package into docker using a multistage build to avoid installing Java and maven locally. I use `FROM --platform=$BUILDPLATFORM maven:3-openjdk-15-slim AS build` to avoid building the image two times. Indeed the second times the build layer will be cached.
+For Java, the code is compiled to Java bytecode and it's architecture-independent. So when you build in arm or amd64 the Java Bytecode will be the same. In this example, I will build the package into docker using a multistage build to avoid installing Java and maven locally. I use `FROM --platform=$BUILDPLATFORM maven:3-openjdk-15-slim AS build` to avoid building the image two times. Indeed the second times the build layer will be cached.
 ```
 cd java
 ```
@@ -193,7 +192,7 @@ docker buildx build --progress plain --platform linux/amd64,linux/arm64 -t $ACCO
 docker buildx imagetools inspect $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/hello-world:java
 ```
 
-I've got another version of a Dockerfile without the multistage part. I need to compile my application into  Java bytecodes before building the docker image with the `DockerfileNoStage` file. So let's intall a JDK first.
+I've got another version of a Dockerfile without the multistage part. I need to compile my application into Java bytecodes before building the docker image with the `DockerfileNoStage` file. So let's install a JDK first.
 
 ```
 # Install a JDK 15
@@ -223,7 +222,7 @@ docker buildx imagetools inspect $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/hello
 ```
 cd ../golang
 ```
-Go need to be build for the different architecture. I use a multistage dockerfile, to get the right building image during the build process.
+Go need to be built for different architectures. I use a multistage dockerfile, to get the right building image during the build process.
 
 ### Create the docker image for amd64 and arm64 architecture and push it to ECR
 ```
@@ -233,7 +232,7 @@ docker buildx build --progress plain --platform linux/amd64,linux/arm64 -t $ACCO
 ```
 docker buildx imagetools inspect $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/hello-world:go
 ```
-Go is also able to build artifact for different Operating Systems and architectures by using environment variables. So I have another Dockerfile version witch used artifact already builded localy.
+Go is also able to build apllication for different Operating Systems and architectures by using environment variables. So I have another Dockerfile version witch used the application already built locally.
 ```
 # Install golang
 sudo yum install golang -y
@@ -301,5 +300,5 @@ aws ecr delete-repository \
 ````
 
 ## Conclusion
-In this demo, we create a multiarch docker images and use it with EKS. 
-By combining Graviton 2 and spot, the potentiol saving is very important. For this demo I used 2 separeted managed node group for ARM and x86 to be sure to deploy my pod into the 2 architectures but the different architecture could be into the same managed node group.
+In this demo, we create multi-arch docker images and use them with EKS. 
+By combining Graviton 2 and spot, the potential saving is very important. For this demo, I used 2 different managed node group for ARM and x86 to be sure to deploy my pod into the 2 architectures but the different architecture could be into the same managed node group.
