@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-no-stage-deployment
+spec:
+  selector:
+    matchLabels:
+      app: golang-no-stage
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: golang-no-stage
+    spec:
+      containers:
+      - name: golang-no-stage
+        image: $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/hello-world:goNoStage
+        ports:
+        - containerPort: 8080 
